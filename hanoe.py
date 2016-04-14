@@ -1,15 +1,9 @@
-﻿#/usr/bin/env python3
+#!/usr/bin/env python3
 
-import re, copy, sys, curses
+import re, copy, sys
 import AI
 
-'''
-myscreen = curses.initscr()
-myscreen.border(0)
-myscreen.refresh()
-myscreen.getch()
-curses.endwin()
-'''
+
 #Вместо len лучше было бы вставить hoops_number
 class stack_pyramid(list):
     def __init__(self, arr = []):
@@ -45,12 +39,13 @@ class Game:
 
     mov_cmd = re.compile('\d+')
     
-    def __init__(self, ai = None, who = "Player", lvl = 5, istream = input, ostream = print):
+    def __init__(self, ai = None, who = "Player", lvl = 5, istream = input, ostream = print, log=0):
         self.status = "Runing"
         self.who = who
         self.istream = istream
         self.ai = ai
         self.lvl = lvl
+        self.log = log
         self.count = 0
         arr = list(range(lvl+1))[1:]
         arr.reverse()
@@ -63,6 +58,8 @@ class Game:
     
     def process(self):
         #(user_input[0] != "exit"  or user_input[0] != "e") and
+        if (self.log==1):
+            f= open('log.txt', 'w')
         while( self.status == "Runing"):
             if self.who == "Player":
                 moves = self.istream().lower()
@@ -78,7 +75,11 @@ class Game:
             if(  moves[0] > 0 and moves[0] < 4 ) and ( moves[1] > 0 and moves[1] < 4 ):
                 self.count+=1
                 from_ = moves[0]-1
+                if (self.log==1):
+                    f.write(str(from_))
                 to_ = moves[1]-1
+                if (self.log==1):
+                    f.write(str(to_)+'\n')
             else:
                 print("WRONG MOVE")
             try:
@@ -108,6 +109,10 @@ class Game:
             
     
 if __name__ == "__main__":
+    game=Game()
+    who1="Player"
+    ai1=None
+    log1=0
     if '--help' in sys.argv:
         print(u"\nПРАВИЛА:")
         print(u"Подробнее тут - https://ru.wikipedia.org/wiki/Ханойская_башня")
@@ -131,8 +136,15 @@ if __name__ == "__main__":
         print(u"Если вы хотите получить информацию о первой пирамиде, то N = 0\n")
         print(u"УДАЧИ!\n")
         exit()
-    elif '--ai' in sys.argv:
-        game = Game(who = "AI", ai = AI.AI)
-    else: game = Game()
+    if '--ai' in sys.argv:
+        who1="AI"
+        ai1=AI.AI
+    if '--log' in sys.argv:
+        log1=1
+    game=Game(who=who1, ai=ai1,log=log1)
+
+
+
+    # else: game = Game()
     game.draw()
     game.process()
